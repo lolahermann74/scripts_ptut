@@ -1,4 +1,6 @@
-#Sardine 
+# AFC Sardine 
+# Auteur : Philippine Bacquey
+
 #Packages 
 library(readr)      
 library(tidyverse)  
@@ -14,7 +16,7 @@ library(RColorBrewer)
 
 # Préparation des données ####
 ## Importation du jeu de données 
-data <- read_delim("C:/Users/Bacquey/Desktop/M2/Ptut/WP1_indiv_trie_strandarise.csv", 
+data <- read_delim("C:/Users/Bacquey/Desktop/M2/Ptut/WP1_indiv_trie.csv", 
                    delim = ";", escape_double = FALSE, trim_ws = TRUE)
 
 # Selection de l'espèce et de la campagne 

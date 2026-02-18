@@ -1,4 +1,6 @@
-# AFC SOLE 
+# AFC  Merlu
+# Auteur : Philippine Bacquey
+
 #Packages 
 library(readr)      
 library(tidyverse)  
@@ -12,33 +14,26 @@ library(sf)
 library(rnaturalearth)
 
 # Préparation des données ####
-data <- read_delim("C:/Users/Bacquey/Desktop/M2/Ptut/WP1_indiv_trie_strandarise.csv", 
+data <- read_delim("C:/Users/Bacquey/Desktop/M2/Ptut/WP1_indiv_trie.csv", 
                    delim = ";", escape_double = FALSE, trim_ws = TRUE)
 
-# Visualise les colonnes 
-data %>% 
-  select(last_col(12):last_col()) %>% 
-  head()
-
 ## Préparation des Classes ####
-# Taille = 31 cm
+#Taille = 57 cm
 df <- data %>%
   filter(
-    Nom_Scientifique == "Solea solea",
-    Campagne == "ORHAGO"
+    Nom_Scientifique == "Merluccius merluccius",
+    Campagne == "EVHOE"
   ) %>%
-  mutate(Classe_Tri = if_else(Taille > 31, "Grand", "Petit")) %>%
+  mutate(Classe_Tri = if_else(Taille > 57, "Grand", "Petit")) %>%
   select(Annee, LongDeb, LatDeb, LatFin, LongFin, Nbr, Classe_Tri, Strate, longueur_trait)
 
-length(unique(df$Annee))
-names(df)
-
-# Vérification des NA 
+# On vérifie les NA 
 df %>%
   summarise(across(everything(), ~ sum(is.na(.))))
 df <- df %>%
   drop_na()
 
+# Compte le nombre total d'individus capturés par classe
 df %>% 
   group_by(Classe_Tri) %>% 
   summarise(Total_Nbr = sum(Nbr))
@@ -47,6 +42,26 @@ df %>%
 unique(df$Strate)
 length(unique(df$Strate))
 unique(df$Annee)
+
+# On prend à partie de 1995
+df <- df %>%
+  filter(Annee >= 1995) 
+
+# Compte le nombre de strates uniques
+n_distinct(df$Strate)
+
+verif_strates <- df %>%
+  group_by(Strate) %>%
+  summarise(
+    Nb_Points = n(),
+    Nb_Annees = n_distinct(Annee),
+    Annee_Debut = min(Annee),
+    Annee_Fin = max(Annee)
+  ) %>%
+  arrange(desc(Nb_Points)) 
+
+print(verif_strates)
+
 
 # Standarise ####
 df_prep_somme <- df %>%
@@ -73,12 +88,13 @@ df_matrice <- df_prep_somme %>%
 # Passage en rownames pour l'AFC
 df_final <- df_matrice %>% column_to_rownames(var = "Strate")
 
-
 ### Diagnostics ##
 any(is.na(df_final))
 sum(is.na(df_final)) 
+# Calcul de la proportion de zéros 
 prop_zeros <- mean(df_final == 0) * 100
 cat("Proportion de zéros dans la matrice :", round(prop_zeros, 2), "%\n")
+
 df_afc <- df_final[rowSums(df_final) > 0, colSums(df_final) > 0]
 
 # AFC ####
@@ -97,11 +113,10 @@ fviz_eig(res.afc,
          main = "Inertie expliquée par axe (%)") +
   theme_minimal()
 
-
 #Graphique année + classe 
-# On crée un vecteur de groupes basé sur le nom des colonnes
 groupes_taille <- ifelse(grepl("Grand", colnames(df_afc)), "Grand", "Petit")
 
+# Graphique avec couleurs par classe
 fviz_ca_col(res.afc,
             repel = TRUE,
             habillage = as.factor(groupes_taille), 
@@ -135,4 +150,4 @@ fviz_ca_row(res.afc,
     axis.text = element_text(face = "bold", size = 12, color = "black")
   )
 
-## Fin du script 
+# Fin du script 
