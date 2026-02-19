@@ -217,13 +217,13 @@ ggplot(env_long2 %>% filter(groupe != "Autres"),
 
 # Graphique pour le rapport : 
 
-# 4) Seuil (à remplacer)
-seuil_sal <- 12.891   # <-- mets ta valeur ici
+# 4) Seuil
+seuil_temp <- 12.891
 
-ggplot(env_long2,
-       aes(x = Annee, y = thetao_m3_q3, group = transect_id, colour = transect_id)) +
+ggplot(env_long2, aes(x = Annee, y = thetao_m3_q3, group = transect_id, 
+                      colour = transect_id)) +
   geom_line(linewidth = 0.7, alpha = 0.85) +
-  geom_hline(yintercept = seuil_sal,
+  geom_hline(yintercept = seuil_temp,
              linetype = "dashed",
              linewidth = 0.9,
              colour = "black") +
