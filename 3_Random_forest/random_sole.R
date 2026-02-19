@@ -1,27 +1,25 @@
-# --- Installation et chargement du package ---
-install.packages("randomForest")
+# Random forest pour le sole
+# Auteur : Mathis Dubois
+
+# Packages
 library(randomForest)
-install.packages("rpart")
 library(rpart)
-install.packages("rpart.plot")
 library(rpart.plot)
-install.packages("party")
 library(party)
 library(ggplot2)
 library(dplyr)
-install.packages("pROC")
 library(pROC)
 
-# --- Chargement des données ---
+# Chargement des données
 donnees <- sole_enviro_11fev26_880
 
-# --- Sélection des variables ---
+# Sélection des variables
 df_model <- donnees[, c(7, 14:193)]
 
 # Suppression des lignes avec des valeurs manquantes (NA)
 df_model <- na.omit(df_model)
 
-# --- Exécution du Random Forest ---
+# Exécution du Random Forest
 set.seed(123)
 rf_test <- cforest(Nbr ~ ., data = df_model, 
                    controls = cforest_unbiased(ntree = 500, mtry = 5))
@@ -48,31 +46,22 @@ top_10_cf <- df_imp_cf %>%
 ggplot(top_10_cf, aes(x = reorder(Variable, Importance), y = Importance, fill = Importance)) +
   geom_col(show.legend = FALSE) +
   coord_flip() +
-  scale_fill_gradient(low = "#56B4E9", high = "#004D40") + # Thème Océan
+  scale_fill_gradient(low = "#56B4E9", high = "#004D40") +
   theme_minimal() +
-  labs(title = "Top 10 Importance des variables", # J'ai précisé un peu le titre
+  labs(title = "Top 10 Importance des variables",
        x = NULL,
        y = "Score d'Importance") +
-  theme(
-    panel.grid.major.y = element_blank(),
-    
-    # --- MODIFICATIONS ICI ---
-    # 1. Titre Général (Gros et Gras)
-    plot.title = element_text(size = 20, face = "bold", hjust = 0.5), # hjust=0.5 pour centrer
-    
-    # 2. Titre des axes (Gros et Gras)
-    axis.title = element_text(size = 16, face = "bold"),
-    
-    # 3. Noms des variables sur l'axe Y (Gros et Gras aussi pour la lisibilité)
-    axis.text = element_text(size = 12, face = "bold", color = "black")
-  )
+  theme(panel.grid.major.y = element_blank(),
+        plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 16, face = "bold"),
+        axis.text = element_text(size = 12, face = "bold", color = "black"))
 
-# --- Récupération de la meilleure variable ---
+# Récupération de la meilleure variable
 scores_importance <- sort(varimp(rf_test, conditional = FALSE), decreasing = TRUE)
 ma_variable <- names(scores_importance)[1]
 print(ma_variable)
 
-# --- Binarisation de l'Abondance (Étape Obligatoire pour ROC) ---
+# Binarisation de l'Abondance (Étape Obligatoire pour ROC)
 # La courbe ROC a besoin de 2 classes (0 ou 1).
 # Cas A : On teste la PRÉSENCE (Nbr > 0) vs ABSENCE (Nbr = 0)
 # Cas B : Si vous n'avez que des présences, on teste FORTE ( > Médiane) vs FAIBLE abondance
@@ -86,16 +75,16 @@ if(min(df_model$Nbr) > 0) {
 # Création de la colonne binaire (0 ou 1)
 df_model$classe_abondance <- ifelse(df_model$Nbr > seuil_coupure_poisson, 1, 0)
 
-# --- Calcul de la Courbe ROC ---
+# Calcul de la Courbe ROC 
 roc_obj <- roc(df_model$classe_abondance, df_model[[ma_variable]], 
                quiet = TRUE) 
 
-# --- Détermination du Seuil Optimal (Youden) ---
+# Détermination du Seuil Optimal (Youden)
 # La méthode de Youden cherche le point qui maximise (Sensibilité + Spécificité)
 resultat_seuil <- coords(roc_obj, "best", best.method = "youden", transpose = FALSE)
 print(resultat_seuil)
 
-# --- Visualisation Graphique ---
+# Visualisation Graphique
 plot(roc_obj, 
      main = paste("Seuil optimal pour", ma_variable),
      col = "#004D40", lwd = 3) # Courbe en vert pétrole
@@ -147,7 +136,7 @@ if(moy_haute > moy_basse) {
       ", l'abondance moyenne DIMINUE de", round(abs(diff_pourcentage), 1), "%.\n")
 }
 
-# --- Graphique final ---
+# Graphique final
 ggplot(df_model, aes(x = Groupe_Seuil, y = Nbr, fill = Groupe_Seuil)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 5, color = "darkred") +
@@ -158,10 +147,8 @@ ggplot(df_model, aes(x = Groupe_Seuil, y = Nbr, fill = Groupe_Seuil)) +
        subtitle = paste("Seuil :", round(valeur_seuil, 3), "| Point rouge = Moyenne d'abondance"),
        x = NULL, y = "Abondance (Nbr)") +
   theme(legend.position = "none",axis.text = element_text(size=13,color="black"),axis.title = element_text(size=14,color="black")) +
-  
-  # Ligne 1 : Variation (vjust = 2 pour être en haut)
   annotate("text", x = 1.5, y = Inf, vjust = 2, 
            label = paste0("Variation : ", ifelse(diff_pourcentage > 0, "+", ""), round(diff_pourcentage, 1), "%"), 
            size = 5, fontface = "bold", color = "black") 
   
-
+# Fin de script
