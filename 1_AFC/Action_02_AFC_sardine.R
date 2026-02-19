@@ -23,8 +23,7 @@ data <- read_delim("C:/Users/Bacquey/Desktop/M2/Ptut/WP1_indiv_trie.csv",
 data <- data %>%
   filter(
     Nom_Scientifique == "Sardina pilchardus", 
-    Campagne == "PELGAS"
-  ) %>%
+    Campagne == "PELGAS") %>%
   select(Annee, LongDeb, LatDeb, LatFin, LongFin, Nbr, Strate, longueur_trait, Taille)
 
 ## Formation des transects ####
@@ -37,8 +36,7 @@ df_sardine <- coords_unique_sardine
 df_sardine <- df_sardine %>%
   mutate(
     LongMid = (LongDeb + LongFin) / 2,
-    LatMid  = (LatDeb + LatFin) / 2
-  )
+    LatMid  = (LatDeb + LatFin) / 2)
 
 # Chargement du transect théorique (Route PELGAS)
 zone_maq <- st_read("C:/Users/Bacquey/Desktop/M2/Ptut/transect maquereau/route_previ3.shp")
@@ -52,8 +50,7 @@ coords_sardine_sf <- coords_sardine_sf %>%
   mutate(
     transect_index = idx_transect,
     transect_id    = zone_maq_l93$id[idx_transect], 
-    dist_transect_m = as.numeric(st_distance(., zone_maq_l93[idx_transect, ], by_element = TRUE))
-  )
+    dist_transect_m = as.numeric(st_distance(., zone_maq_l93[idx_transect, ], by_element = TRUE)))
 
 #  Visualisation
 nb_transects <- length(unique(capture_transect_table_wgs84$transect_id))
@@ -67,8 +64,7 @@ ggplot() +
   labs(
     color = "Transect ID",
     title = "Rattachage des traits PELGAS aux transects théoriques",
-    subtitle = "Position basée sur le milieu du trait de chalut"
-  ) +
+    subtitle = "Position basée sur le milieu du trait de chalut") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 
 # Export
@@ -123,8 +119,7 @@ df_prep_somme <- df_classe %>%
   summarise(
     Somme_Nbr = sum(Nbr, na.rm = TRUE),
     Somme_Dist = sum(longueur_trait, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
+    .groups = "drop") %>%
   mutate(Abondance_Std = (Somme_Nbr / Somme_Dist) * 1000)
 
 # Vérification division par zéro 
@@ -138,8 +133,7 @@ df_matrice <- df_prep_somme %>%
     id_cols = transect_id,
     names_from = c(Annee, Classe_Tri),
     names_sep = "_",
-    values_from = Abondance_Std
-  )
+    values_from = Abondance_Std)
 
 # Passage en rownames pour l'AFC
 df_final <- df_matrice %>% column_to_rownames(var = "transect_id")
@@ -180,19 +174,15 @@ fviz_ca_col(res.afc,
             palette = c("#E74C3C", "#3498DB"),    
             title = "AFC — Séparation spatio-temporelle des tailles",
             pointsize = 2,      
-            labelsize = 5       
-) +
+            labelsize = 5) +
   theme_minimal() +
-  labs(
-    color = "Groupes de taille", 
-    shape = "Groupes de taille"  
-  ) +
+  labs(color = "Groupes de taille", 
+       shape = "Groupes de taille") +
   theme(
     axis.title = element_text(face = "bold", size = 16, color = "black"), 
     axis.text = element_text(face = "bold", size = 14, color = "black"),
     legend.title = element_text(face = "bold", size = 14),
-    legend.text = element_text(face = "bold", size = 14)
-  )
+    legend.text = element_text(face = "bold", size = 14))
 
 #Graphique site 
 fviz_ca_row(res.afc,
@@ -204,7 +194,6 @@ fviz_ca_row(res.afc,
   theme_minimal() +
   theme(
     axis.title = element_text(face = "bold", size = 14, color = "black"), 
-    axis.text = element_text(face = "bold", size = 12, color = "black")
-  )
+    axis.text = element_text(face = "bold", size = 12, color = "black"))
 
 ## Fin du script 

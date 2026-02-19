@@ -54,8 +54,7 @@ df_prep_somme <- df %>%
   summarise(
     Somme_Nbr = sum(Nbr, na.rm = TRUE),
     Somme_Dist = sum(longueur_trait, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
+    .groups = "drop") %>%
   mutate(Abondance_Std = (Somme_Nbr / Somme_Dist) * 1000)
 
 df_prep_somme <- df_prep_somme %>% filter(!is.infinite(Abondance_Std))
@@ -67,8 +66,7 @@ df_matrice <- df_prep_somme %>%
     id_cols = Strate,
     names_from = c(Annee, Classe_Tri),
     names_sep = "_",
-    values_from = Abondance_Std
-  )
+    values_from = Abondance_Std)
 
 # Passage en rownames pour l'AFC
 df_final <- df_matrice %>% column_to_rownames(var = "Strate")
@@ -108,19 +106,16 @@ fviz_ca_col(res.afc,
             palette = c("#E74C3C", "#3498DB"),    
             title = "AFC — Séparation spatio-temporelle des tailles",
             pointsize = 2,      
-            labelsize = 5       
-) +
+            labelsize = 5) +
   theme_minimal() +
   labs(
     color = "Groupes de taille", 
-    shape = "Groupes de taille"  
-  ) +
+    shape = "Groupes de taille") +
   theme(
     axis.title = element_text(face = "bold", size = 16, color = "black"), 
     axis.text = element_text(face = "bold", size = 14, color = "black"),
     legend.title = element_text(face = "bold", size = 14),
-    legend.text = element_text(face = "bold", size = 14)
-  )
+    legend.text = element_text(face = "bold", size = 14))
 
 #Graphique site 
 fviz_ca_row(res.afc,
@@ -132,7 +127,6 @@ fviz_ca_row(res.afc,
   theme_minimal() +
   theme(
     axis.title = element_text(face = "bold", size = 14, color = "black"), 
-    axis.text = element_text(face = "bold", size = 12, color = "black")
-  )
+    axis.text = element_text(face = "bold", size = 12, color = "black"))
 
 ## Fin du script 

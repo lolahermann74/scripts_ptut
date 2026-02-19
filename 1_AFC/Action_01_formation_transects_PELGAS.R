@@ -1,8 +1,10 @@
 # Récupération des transects pour PELGAS 
-#____________________________ pour sardine __________________________________________________________________________
-# Préparation des données ####
+# Auteur : Philippine Bacquey
+
+# SARDINE ####
+### Préparation des données ####
 ## Importation du jeu de données 
-data <- read_delim("C:/Users/Bacquey/Desktop/M2/Ptut/WP1_indiv_trie_strandarise.csv", 
+data <- read_delim("C:/Users/Bacquey/Desktop/M2/Ptut/WP1_indiv_trie.csv", 
                    delim = ";", escape_double = FALSE, trim_ws = TRUE)
 
 # Selection de l'espèce et de la campagne 
@@ -59,8 +61,7 @@ coords_sardine_sf <- coords_sardine_sf %>%
   mutate(
     transect_index = idx_transect,
     transect_id    = zone_maq_l93$id[idx_transect], 
-    dist_transect_m = as.numeric(st_distance(., zone_maq_l93[idx_transect, ], by_element = TRUE))
-  )
+    dist_transect_m = as.numeric(st_distance(., zone_maq_l93[idx_transect, ], by_element = TRUE)))
 
 # Nettoyage pour l'exportation
 capture_transect_table_wgs84 <- coords_sardine_sf %>%
@@ -71,16 +72,15 @@ capture_transect_table_wgs84 <- coords_sardine_sf %>%
 # Export
 write.csv(capture_transect_table_wgs84, "C:/Users/Bacquey/Desktop/M2/Ptut/captures_transects_sardine_final.csv", row.names = FALSE)
 
-#____________________________ pour maqureau __________________________________________________________________________
-# Préparation du shapefile ####
+# MAQUEREAU ####
+### Préparation du shapefile ####
 data <- read_delim("C:/Users/Bacquey/Desktop/M2/Ptut/WP1_indiv_trie_strandarise.csv", 
                    delim = ";", escape_double = FALSE, trim_ws = TRUE)
 
 data <- data %>%
   filter(
     Nom_Scientifique == "Scomber scombrus", 
-    Campagne == "PELGAS"
-  ) %>%
+    Campagne == "PELGAS") %>%
   # On garde les colonnes nécessaires
   select(Annee, LongDeb, LatDeb, LatFin, LongFin, Nbr, Strate, longueur_trait, Taille)
 
