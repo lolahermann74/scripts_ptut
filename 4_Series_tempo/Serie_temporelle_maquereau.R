@@ -1,9 +1,12 @@
-#####################################################################
-#######################Maquereau#####################################
-#####################################################################
+# Série temporelle de la température (thetao_m3_q3) par transect pour le maquereau
+# Auteur : Mathis Damestoy
 
+# Packages
+library(dplyr)
+library(tidyr)
+
+# Importation des données
 setwd("C:/Users/mathi/Desktop/PTUT_M2/PTUT_AVIZONS")
-
 maquereau_enviro_10fev26_350 <- read_csv("maquereau_enviro_10fev26_350.csv", 
                                          +     na = "NA")
 
@@ -12,22 +15,18 @@ maquereau_with_transects_final <- read_delim("maquereau_with_transects_final.csv
                                              +     trim_ws = TRUE)
 
 env_maquereau <- maquereau_enviro_10fev26_350
-
 transect_maquereau <- maquereau_with_transects_final
 
 head(env_maquereau)
 head(transect_maquereau)
 
-#rajouter la colonne transect id au jeu de donnée env_maqureau
-
-library(dplyr)
-
-#On nettoie d’abord transect_maquereau pour n’avoir qu’une ligne par station
+#rajouter la colonne transect id au jeu de donnée env_maquereau
+# On nettoie d’abord transect_maquereau pour n’avoir qu’une ligne par station
 ref_transect <- transect_maquereau %>%
   select(Code_Station, Long, Lat, transect_id) %>%
   distinct()
 
-#on rajoute transect_id à env_sardine
+# On rajoute transect_id à env_sardine
 env_maquereau_transect <- env_maquereau %>%
   left_join(
     ref_transect,
@@ -37,25 +36,20 @@ head(env_maquereau_transect)
 env_maquereau_transect$transect_id
 
 env_transect_annee <- env_maquereau_transect %>%
-  filter(!is.na(transect_id)) %>%                         # garder seulement les points matchés
-  group_by(transect_id, Annee = year) %>%                 # Transect × Année
+  filter(!is.na(transect_id)) %>% # garder seulement les points matchés
+  group_by(transect_id, Annee = year) %>% # Transect × Année
   summarise(
     across(
       where(is.numeric),
-      ~ mean(.x, na.rm = TRUE)
-    ),
-    .groups = "drop"
-  )
+      ~ mean(.x, na.rm = TRUE)),
+    .groups = "drop")
 head(env_transect_annee)
 
-###################################on garde les colonne qui nous interesse###################################################
+# on garde les colonne qui nous interesse ####
 env_transect_var <- env_transect_annee %>%
   select(transect_id, Annee, thetao_m3_q3)
 
 head(env_transect_var)
-
-library(dplyr)
-library(tidyr)
 
 #une ligne par année et une colonne par strate
 env_transect_wide <- env_transect_var %>%
