@@ -14,8 +14,12 @@ library(sf)
 library(rnaturalearth)
 
 # Préparation des données ####
-data <- read_delim("C:/Users/Bacquey/Desktop/M2/Ptut/WP1_indiv_trie.csv", 
-                   delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+# Importation des données
+# Chemin vers les datasets (à adapter)
+setwd("G:/PTUT_AVIZONS/wetransfer") # mettre le bon chemin
+getwd()
+data <- read.csv("WP1_indiv_trie.csv")
 
 # Visualise les colonnes 
 data %>% 
@@ -24,32 +28,32 @@ data %>%
 
 ## Préparation des Classes ####
 # Taille = 31 cm
-df <- data %>%
+sole <- data %>%
   filter(Nom_Scientifique == "Solea solea",
     Campagne == "ORHAGO") %>%
   mutate(Classe_Tri = if_else(Taille > 31, "Grand", "Petit")) %>%
   select(Annee, LongDeb, LatDeb, LatFin, LongFin, Nbr, Classe_Tri, Strate, longueur_trait)
 
-length(unique(df$Annee))
-names(df)
+length(unique(sole$Annee))
+names(sole)
 
 # Vérification des NA 
-df %>%
+sole %>%
   summarise(across(everything(), ~ sum(is.na(.))))
-df <- df %>%
+sole <- sole %>%
   drop_na()
 
-df %>% 
+sole %>% 
   group_by(Classe_Tri) %>% 
   summarise(Total_Nbr = sum(Nbr))
 
 # Liste des noms des strates (sans doublons)
-unique(df$Strate)
-length(unique(df$Strate))
-unique(df$Annee)
+unique(sole$Strate)
+length(unique(sole$Strate))
+unique(sole$Annee)
 
 # Standarise ####
-df_prep_somme <- df %>%
+df_prep_somme <- sole %>%
   group_by(Strate, Annee, Classe_Tri) %>%
   summarise(
     Somme_Nbr = sum(Nbr, na.rm = TRUE),
