@@ -15,19 +15,22 @@ library(rnaturalearth)
 library(RColorBrewer)
 
 # Préparation des données ####
-# Importation du jeu de donnée 
-data <- read_delim("C:/Users/Bacquey/Desktop/M2/Ptut/WP1_indiv_trie.csv", 
-                   delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+# Importation des données
+# Chemin vers les datasets (à adapter)
+setwd("G:/PTUT_AVIZONS/wetransfer") # mettre le bon chemin
+getwd()
+data <- read.csv("WP1_indiv_trie.csv")
 
 # Selection de l'espèce et de la campagne 
-data <- data %>%
+maquereau <- data %>%
   filter(Nom_Scientifique == "Scomber scombrus", 
     Campagne == "PELGAS") %>%
   select(Annee, LongDeb, LatDeb, LatFin, LongFin, Nbr, Strate, longueur_trait, Taille)
 
 ## Formation des transects ####
 # Préparation des données de capture
-coords_unique_maquereau <- read.csv("C:/Users/Bacquey/Desktop/M2/Ptut/traits_PELGAS_lignes.csv") 
+coords_unique_maquereau <- read.csv("traits_PELGAS_lignes_maquereau.csv") 
 head(coords_unique_maquereau)
 df_maquereau <- coords_unique_maquereau 
 
@@ -38,7 +41,14 @@ df_maquereau <- df_maquereau %>%
     LatMid  = (LatDeb + LatFin) / 2)
 
 # Chargement des transects théoriques 
-zone_maq_l93 <- st_read("C:/Users/Bacquey/Desktop/M2/Ptut/transect maquereau/route_previ3.shp") %>%
+zone_maq_l93 <- st_read("route_previ3.shp") %>%
+  st_transform(2154)
+
+# Transformation en objet spatial (SF) basé sur le point milieu
+coords_maquereau_sf <- st_as_sf(
+  df_maquereau,
+  coords = c("LongMid", "LatMid"),
+  crs = 4326) %>%
   st_transform(2154)
 
 # Rattachage au transect le plus proche
@@ -51,8 +61,15 @@ coords_maquereau_sf <- coords_maquereau_sf %>%
     transect_id    = zone_maq_l93$id[idx_transect], 
     dist_transect_m = as.numeric(st_distance(., zone_maq_l93[idx_transect, ], by_element = TRUE)))
 
+# Nettoyage pour l'exportation
+# On repasse en WGS84 pour avoir des coordonnées GPS classiques dans le CSV
+capture_transect_table_wgs84_maq <- coords_maquereau_sf %>%
+  st_transform(4326) %>%
+  st_drop_geometry() %>%
+  as.data.frame()
+
 # Visualisation
-nb_transects <- length(unique(capture_transect_table_wgs84$transect_id))
+nb_transects <- length(unique(capture_transect_table_wgs84_maq$transect_id))
 palette_transect <- scales::hue_pal()(nb_transects) 
 
 ggplot() +
@@ -66,13 +83,13 @@ ggplot() +
     subtitle = "Position basée sur le milieu du trait de chalut") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 
-# Export
-write.csv(capture_transect_table_wgs84, "C:/Users/Bacquey/Desktop/M2/Ptut/captures_transects_maquereau_final.csv", row.names = FALSE)
+# Export pour ensuite utiliser pour les séries temporelles
+write.csv(capture_transect_table_wgs84_maq, "captures_transects_maquereau_final.csv", row.names = FALSE)
 
 ## Préparation du data avec les transects ####
-df <- read.csv("C:/Users/Bacquey/Desktop/M2/Ptut/captures_transects_maquereau_final.csv")
+df <- capture_transect_table_wgs84_maq
 head(df)
-head(data)
+head(maquereau)
 
 # Retire les doublons 
 correspondance_transect <- df %>%
@@ -80,7 +97,7 @@ correspondance_transect <- df %>%
   distinct()
 
 # Fusion avec data
-data_avec_transect <- data %>%
+data_avec_transect <- maquereau %>%
   left_join(correspondance_transect, 
             by = c("LongDeb", "LatDeb", "LongFin", "LatFin"))
 
