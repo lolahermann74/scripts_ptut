@@ -14,12 +14,16 @@ library(sf)
 library(rnaturalearth)
 
 # Préparation des données ####
-data <- read_delim("C:/Users/Bacquey/Desktop/M2/Ptut/WP1_indiv_trie.csv", 
-                   delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+# Importation des données
+# Chemin vers les datasets (à adapter)
+setwd("G:/PTUT_AVIZONS/wetransfer") # mettre le bon chemin
+getwd()
+data <- read.csv("WP1_indiv_trie.csv")
 
 ## Préparation des Classes ####
 #Taille = 57 cm
-df <- data %>%
+merlu <- data %>%
   filter(
     Nom_Scientifique == "Merluccius merluccius",
     Campagne == "EVHOE") %>%
@@ -27,29 +31,29 @@ df <- data %>%
   select(Annee, LongDeb, LatDeb, LatFin, LongFin, Nbr, Classe_Tri, Strate, longueur_trait)
 
 # On vérifie les NA 
-df %>%
+merlu %>%
   summarise(across(everything(), ~ sum(is.na(.))))
-df <- df %>%
+merlu <- merlu %>%
   drop_na()
 
 # Compte le nombre total d'individus capturés par classe
-df %>% 
+merlu %>% 
   group_by(Classe_Tri) %>% 
   summarise(Total_Nbr = sum(Nbr))
 
 # Liste des noms des strates (sans doublons)
-unique(df$Strate)
-length(unique(df$Strate))
-unique(df$Annee)
+unique(merlu$Strate)
+length(unique(merlu$Strate))
+unique(merlu$Annee)
 
 # On prend à partie de 1995
-df <- df %>%
+merlu <- merlu %>%
   filter(Annee >= 1995) 
 
 # Compte le nombre de strates uniques
-n_distinct(df$Strate)
+n_distinct(merlu$Strate)
 
-verif_strates <- df %>%
+verif_strates <- merlu %>%
   group_by(Strate) %>%
   summarise(
     Nb_Points = n(),
@@ -62,7 +66,7 @@ print(verif_strates)
 
 
 # Standarise ####
-df_prep_somme <- df %>%
+df_prep_somme <- merlu %>%
   group_by(Strate, Annee, Classe_Tri) %>%
   summarise(
     Somme_Nbr = sum(Nbr, na.rm = TRUE),
