@@ -32,7 +32,7 @@ WP1_merlu <- WP1 %>%
     Nom_Scientifique == "Merluccius merluccius",
     Campagne == "EVHOE" )
 
-
+# Visualisation rapide des données
 head(WP1_merlu)
 head(env_merlu)
 
@@ -42,15 +42,13 @@ head(env_merlu)
 #Association strate du WP1 à l'environnement####
   # WP1 : on prend la position (Deb) et la date (DateDeb) ----
 wp1_strate <- WP1_merlu %>%
-  mutate(
-    date  = as.Date(DateDeb),
-    Annee = as.integer(format(date, "%Y"))) %>%
-  transmute(
-    station_code = Code_Station,
-    Strate,
-    Annee,
-    Long = LongDeb,
-    Lat  = LatDeb) %>%
+  mutate(date  = as.Date(DateDeb),
+         Annee = as.integer(format(date, "%Y"))) %>%
+  transmute(station_code = Code_Station,
+            Strate,
+            Annee,
+            Long = LongDeb,
+            Lat  = LatDeb) %>%
   distinct()   # évite les doublons (WP1 a souvent plusieurs lignes par station/jour)
 
 #on change le nom de la colonne pour avoir la même 
@@ -134,7 +132,7 @@ autoplot(env_strate_ts) +
   xlab("Année") +
   ggtitle("")
 
-##########supprimer les colonnes si il y a plus de 2 NA ####################################
+# Supprimer les colonnes si il y a plus de 2 NA ####
 
 head(env_strate_wide)
 
