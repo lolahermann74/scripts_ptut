@@ -1,4 +1,5 @@
-# Série temporelle de la température (thetao_m3_q3) par transect pour le maquereau
+# Série temporelle de la pression partielle de CO2 (spco2_y2_sd) par transect 
+# pour le merlu
 # Auteur : Mathis Damestoy
 
 # Packages
