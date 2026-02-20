@@ -10,8 +10,11 @@ library(ggplot2)
 library(dplyr)
 library(pROC)
 
-# Chargement des données
-donnees <- sole_enviro_11fev26_880
+# Importation des données
+# Chemin vers les datasets (à adapter)
+setwd("G:/PTUT_AVIZONS/wetransfer") # mettre le bon chemin
+getwd()
+donnees <- read.csv("sole_enviro_11fev26_880.csv")
 
 # Sélection des variables
 df_model <- donnees[, c(7, 14:193)]

@@ -11,7 +11,10 @@ library(dplyr)
 library(pROC)
 
 # Importation des données
-donnees <- maquereau_enviro_10fev26_350
+# Chemin vers les datasets (à adapter)
+setwd("G:/PTUT_AVIZONS/wetransfer") # mettre le bon chemin
+getwd()
+donnees <- read.csv("maquereau_enviro_10fev26_350.csv")
 
 # Sélection des variables d'intérêts
 df_model <- donnees[, c(8, 15:194)]
@@ -109,11 +112,10 @@ donnees$Groupe_Seuil <- ifelse(donnees[[ma_variable]] > valeur_seuil,
 # Calcul des statistiques par groupe
 synthese_effet <- donnees %>%
   group_by(Groupe_Seuil) %>%
-  summarise(
-    Moyenne_Abondance = mean(Nbr, na.rm = TRUE),
-    Mediane_Abondance = median(Nbr, na.rm = TRUE),
-    Nombre_Stations = n()
-  )
+  summarise(Moyenne_Abondance = mean(Nbr, na.rm = TRUE),
+            Mediane_Abondance = median(Nbr, na.rm = TRUE),
+            Nombre_Stations = n())
+
 print(synthese_effet)
 
 # Interprétation Automatique (Augmentation ou Diminution ?)

@@ -10,8 +10,11 @@ library(ggplot2)
 library(dplyr)
 library(pROC)
 
-# Chargement des données
-donnees <- sardine_enviro_10fev26_398
+# Importation des données
+# Chemin vers les datasets (à adapter)
+setwd("G:/PTUT_AVIZONS/wetransfer") # mettre le bon chemin
+getwd()
+donnees <- read.csv("sardine_enviro_10fev26_398.csv")
 
 # Sélection des variables
 df_model <- donnees[, c(8, 15:194)]
